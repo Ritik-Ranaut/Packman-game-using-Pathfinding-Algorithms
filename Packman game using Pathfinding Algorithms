@@ -1,0 +1,202 @@
+import tkinter as tk
+import random
+
+# Maze layouts (1: wall, 0: empty space, 2: door)
+MAZES = [
+    # Maze 1
+    [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 2, 1],  # Door to Maze 2 (2)
+        [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    # Maze 2
+    [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1],  # Door to Maze 3 (2)
+        [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ],
+    # Maze 3
+    [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+        [1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1],
+        [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    ]
+]
+
+# Constants
+GRID_SIZE = len(MAZES[0])  # Number of rows in the maze
+CELL_SIZE = 30  # Size of each cell
+WINDOW_SIZE = len(MAZES[0][0]) * CELL_SIZE  # Size of the game window (based on the number of columns)
+
+# Pac-Man, Ghost, and Pellet initialization
+PACMAN_COLOR = "yellow"
+GHOST_COLOR = "red"
+PELLET_COLOR = "white"
+WALL_COLOR = "blue"
+DOOR_COLOR = "green"
+
+# Directions
+DIRECTIONS = {
+    "Up": (0, -1),
+    "Down": (0, 1),
+    "Left": (-1, 0),
+    "Right": (1, 0),
+}
+
+class PacmanGame:
+    def __init__(self, root):
+        self.root = root
+        self.canvas = tk.Canvas(root, width=WINDOW_SIZE, height=WINDOW_SIZE, bg="black")
+        self.canvas.pack()
+
+        self.current_maze = 0  # Start in Maze 1
+        self.pacman_pos = [1, 1]  # Initial position of Pac-Man
+        self.pellets = self.generate_pellets(MAZES[self.current_maze])
+        self.ghost_positions = [[7, 1], [7, 7], [7, 14]]  # Ghosts' starting positions
+
+        self.root.bind("<KeyPress>", self.move_pacman)
+        self.update_display()
+        self.move_ghosts()
+
+    def generate_pellets(self, maze):
+        """Generate pellets in the maze."""
+        pellets = []
+        for r, row in enumerate(maze):
+            for c, val in enumerate(row):
+                if val == 0:
+                    pellets.append([r, c])
+        return pellets
+
+    def move_pacman(self, event):
+        """Move Pac-Man in the specified direction."""
+        direction = event.keysym
+        if direction in DIRECTIONS:
+            new_row = self.pacman_pos[0] + DIRECTIONS[direction][1]
+            new_col = self.pacman_pos[1] + DIRECTIONS[direction][0]
+
+            if MAZES[self.current_maze][new_row][new_col] == 0:  # Move to empty space
+                self.pacman_pos = [new_row, new_col]
+            elif MAZES[self.current_maze][new_row][new_col] == 2:  # Move through a door
+                self.switch_maze()
+
+            if self.pacman_pos in self.pellets:
+                self.pellets.remove(self.pacman_pos)
+
+            if not self.pellets:
+                self.end_game("You Win!")
+
+            self.update_display()
+
+    def switch_maze(self):
+        """Switch to the next maze."""
+        self.current_maze = (self.current_maze + 1) % len(MAZES)  # Cycle through mazes
+        # Place Pac-Man at the entrance of the new maze
+        self.pacman_pos = [1, 1]
+        # Regenerate pellets for the new maze
+        self.pellets = self.generate_pellets(MAZES[self.current_maze])
+        self.update_display()
+
+    def move_ghosts(self):
+        """Move the ghosts to chase Pac-Man."""
+        for i, ghost_pos in enumerate(self.ghost_positions):
+            new_ghost_pos = self.chase_pacman(ghost_pos)
+            self.ghost_positions[i] = new_ghost_pos
+
+            if self.pacman_pos == new_ghost_pos:
+                self.end_game("Caught by a Ghost!")
+        
+        self.update_display()
+        self.root.after(500, self.move_ghosts)
+
+    def chase_pacman(self, ghost_pos):
+        """Move the ghost towards Pac-Man."""
+        pacman_row, pacman_col = self.pacman_pos
+        ghost_row, ghost_col = ghost_pos
+
+        best_move = ghost_pos
+        min_distance = float('inf')
+
+        for direction in DIRECTIONS.values():
+            new_row = ghost_row + direction[1]
+            new_col = ghost_col + direction[0]
+
+            if MAZES[self.current_maze][new_row][new_col] == 0:
+                distance = abs(pacman_row - new_row) + abs(pacman_col - new_col)
+                if distance < min_distance:
+                    min_distance = distance
+                    best_move = [new_row, new_col]
+
+        return best_move
+
+    def update_display(self):
+        """Update the game display."""
+        self.canvas.delete("pacman", "pellet", "ghost", "wall", "door")
+
+        # Draw walls and doors
+        for r, row in enumerate(MAZES[self.current_maze]):
+            for c, val in enumerate(row):
+                if val == 1:
+                    self.canvas.create_rectangle(
+                        c * CELL_SIZE, r * CELL_SIZE, (c + 1) * CELL_SIZE, (r + 1) * CELL_SIZE,
+                        fill=WALL_COLOR, tags="wall"
+                    )
+                elif val == 2:
+                    self.canvas.create_rectangle(
+                        c * CELL_SIZE, r * CELL_SIZE, (c + 1) * CELL_SIZE, (r + 1) * CELL_SIZE,
+                        fill=DOOR_COLOR, tags="door"
+                    )
+
+        # Draw Pac-Man
+        self.canvas.create_oval(
+            self.pacman_pos[1] * CELL_SIZE, self.pacman_pos[0] * CELL_SIZE,
+            (self.pacman_pos[1] + 1) * CELL_SIZE, (self.pacman_pos[0] + 1) * CELL_SIZE,
+            fill=PACMAN_COLOR, tags="pacman"
+        )
+
+        # Draw pellets
+        for pellet in self.pellets:
+            self.canvas.create_oval(
+                pellet[1] * CELL_SIZE + 10, pellet[0] * CELL_SIZE + 10,
+                (pellet[1] + 1) * CELL_SIZE - 10, (pellet[0] + 1) * CELL_SIZE - 10,
+                fill=PELLET_COLOR, tags="pellet"
+            )
+
+        # Draw ghosts
+        for ghost_pos in self.ghost_positions:
+            self.canvas.create_oval(
+                ghost_pos[1] * CELL_SIZE, ghost_pos[0] * CELL_SIZE,
+                (ghost_pos[1] + 1) * CELL_SIZE, (ghost_pos[0] + 1) * CELL_SIZE,
+                fill=GHOST_COLOR, tags="ghost"
+            )
+
+    def end_game(self, message):
+        """End the game and display the result."""
+        self.canvas.delete("all")
+        self.canvas.create_text(
+            WINDOW_SIZE // 2, WINDOW_SIZE // 2, text=message, fill="white", font=("Arial", 24)
+        )
+        self.root.after(3000, self.root.quit)
+
+
+# Run the game
+root = tk.Tk()
+game = PacmanGame(root)
+root.mainloop()
